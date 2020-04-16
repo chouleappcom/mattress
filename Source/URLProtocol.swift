@@ -11,12 +11,15 @@ import Foundation
 typealias NSURLProtocol = Foundation.URLProtocol
 
 /// Caches to be consulted
-var caches: [URLCache] = []
+private var caches: [URLCache] = []
+
 /// Provides locking for multi-threading sensitive operations
-let cacheLockObject = NSObject()
+private let globalLock = DispatchQueue(label: "MattressURLCache", attributes: .concurrent)
 
 /// Used to indicate that a request has been handled by this URLProtocol
 private let URLProtocolHandledRequestKey = "URLProtocolHandledRequestKey"
+
+/// Used to configure that all data should be retrieved from cache by default. Defaults to false
 public var shouldRetrieveFromMattressCacheByDefault = false
 
 /**
@@ -95,7 +98,7 @@ class URLProtocol: NSURLProtocol, URLSessionDataDelegate {
         :param: cache The cache to be added.
     */
     class func addCache(cache: URLCache) {
-		synchronized(lockObj: cacheLockObject) { () -> Void in
+        globalLock.sync(flags: .barrier){
             if caches.count == 0 {
 				self.registerProtocol(shouldRegister: true)
             }
@@ -114,7 +117,7 @@ class URLProtocol: NSURLProtocol, URLSessionDataDelegate {
         :param: cache The cache to be removed.
     */
     class func removeCache(cache: URLCache) {
-		synchronized(lockObj: cacheLockObject) { () -> Void in
+        globalLock.sync(flags: .barrier){
 			if let index = caches.firstIndex(of: cache) {
 				caches.remove(at: index)
                 if caches.isEmpty {
@@ -148,8 +151,8 @@ class URLProtocol: NSURLProtocol, URLSessionDataDelegate {
     */
     private class func webViewCacherForRequest(request: URLRequest) -> WebViewCacher? {
         var webViewCacherReturn: WebViewCacher? = nil
-        
-		synchronized(lockObj: cacheLockObject) { () -> Void in
+
+        globalLock.sync {
 			for cache in caches.reversed() {
 				if let webViewCacher = cache.webViewCacherOriginatingRequest(request: request) {
                     webViewCacherReturn = webViewCacher

@@ -9,11 +9,11 @@
 /* Begin PBXBuildFile section */
 		140FA3CB1B30BEA400BFFAAE /* DiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140FA3C51B30BEA400BFFAAE /* DiskCache.swift */; };
 		140FA3CC1B30BEA400BFFAAE /* Mattress.h in Headers */ = {isa = PBXBuildFile; fileRef = 140FA3C61B30BEA400BFFAAE /* Mattress.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		140FA3CD1B30BEA400BFFAAE /* Synchronization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140FA3C71B30BEA400BFFAAE /* Synchronization.swift */; };
 		140FA3CE1B30BEA400BFFAAE /* URLCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140FA3C81B30BEA400BFFAAE /* URLCache.swift */; };
 		140FA3CF1B30BEA400BFFAAE /* URLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140FA3C91B30BEA400BFFAAE /* URLProtocol.swift */; };
 		140FA3D01B30BEA400BFFAAE /* WebViewCacher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140FA3CA1B30BEA400BFFAAE /* WebViewCacher.swift */; };
 		3461EA3BA181A500D5399CBF /* Pods_Mattress.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DB45C0A307740056CE17BAE /* Pods_Mattress.framework */; };
+		68A5594E2448954A00DC5938 /* WKWebViewCacher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A5594D2448954A00DC5938 /* WKWebViewCacher.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -33,7 +33,6 @@
 		0B4929CA1A13FD9C003D9AB3 /* Mattress.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Mattress.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		140FA3C51B30BEA400BFFAAE /* DiskCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DiskCache.swift; path = Source/DiskCache.swift; sourceTree = SOURCE_ROOT; };
 		140FA3C61B30BEA400BFFAAE /* Mattress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Mattress.h; path = Source/Mattress.h; sourceTree = SOURCE_ROOT; };
-		140FA3C71B30BEA400BFFAAE /* Synchronization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Synchronization.swift; path = Source/Synchronization.swift; sourceTree = SOURCE_ROOT; };
 		140FA3C81B30BEA400BFFAAE /* URLCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = URLCache.swift; path = Source/URLCache.swift; sourceTree = SOURCE_ROOT; };
 		140FA3C91B30BEA400BFFAAE /* URLProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = URLProtocol.swift; path = Source/URLProtocol.swift; sourceTree = SOURCE_ROOT; };
 		140FA3CA1B30BEA400BFFAAE /* WebViewCacher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebViewCacher.swift; path = Source/WebViewCacher.swift; sourceTree = SOURCE_ROOT; };
@@ -43,6 +42,7 @@
 		140FA3D51B30BEC600BFFAAE /* URLProtocolTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = URLProtocolTests.swift; path = Tests/URLProtocolTests.swift; sourceTree = SOURCE_ROOT; };
 		140FA3D61B30BEC600BFFAAE /* WebViewCacherTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = WebViewCacherTests.swift; path = Tests/WebViewCacherTests.swift; sourceTree = SOURCE_ROOT; };
 		140FA3DB1B30BED100BFFAAE /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tests/Info.plist; sourceTree = SOURCE_ROOT; };
+		68A5594D2448954A00DC5938 /* WKWebViewCacher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WKWebViewCacher.swift; path = Source/WKWebViewCacher.swift; sourceTree = SOURCE_ROOT; };
 		6C96ECA5F7B4437088FA1360 /* Pods-Mattress.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Mattress.release.xcconfig"; path = "Target Support Files/Pods-Mattress/Pods-Mattress.release.xcconfig"; sourceTree = "<group>"; };
 		8DB45C0A307740056CE17BAE /* Pods_Mattress.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Mattress.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -81,13 +81,13 @@
 		0B4929CC1A13FD9C003D9AB3 /* Mattress */ = {
 			isa = PBXGroup;
 			children = (
-				140FA3C61B30BEA400BFFAAE /* Mattress.h */,
 				140FA3C51B30BEA400BFFAAE /* DiskCache.swift */,
-				140FA3C71B30BEA400BFFAAE /* Synchronization.swift */,
+				140FA3C61B30BEA400BFFAAE /* Mattress.h */,
+				0B4929CD1A13FD9C003D9AB3 /* Supporting Files */,
 				140FA3C81B30BEA400BFFAAE /* URLCache.swift */,
 				140FA3C91B30BEA400BFFAAE /* URLProtocol.swift */,
 				140FA3CA1B30BEA400BFFAAE /* WebViewCacher.swift */,
-				0B4929CD1A13FD9C003D9AB3 /* Supporting Files */,
+				68A5594D2448954A00DC5938 /* WKWebViewCacher.swift */,
 			);
 			path = Mattress;
 			sourceTree = "<group>";
@@ -247,7 +247,7 @@
 				140FA3CE1B30BEA400BFFAAE /* URLCache.swift in Sources */,
 				140FA3CF1B30BEA400BFFAAE /* URLProtocol.swift in Sources */,
 				140FA3D01B30BEA400BFFAAE /* WebViewCacher.swift in Sources */,
-				140FA3CD1B30BEA400BFFAAE /* Synchronization.swift in Sources */,
+				68A5594E2448954A00DC5938 /* WKWebViewCacher.swift in Sources */,
 				140FA3CB1B30BEA400BFFAAE /* DiskCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

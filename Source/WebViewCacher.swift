@@ -19,18 +19,23 @@ typealias WebViewCacherCompletionHandler = (WebViewCacher) -> ()
     to signal that they should be stored in the Mattress
     disk cache.
 */
-class WebViewCacher: NSObject, UIWebViewDelegate {
+class WebViewCacher: NSObject {
 
     // MARK: - Properties
+    private let queue = DispatchQueue(label: "MattressWebViewCacher", attributes: .concurrent)
 
     /// Handler called to determine if a webpage is considered loaded.
     var loadedHandler: WebViewLoadedHandler?
+
     /// Handler called once a webpage has finished loading.
     var completionHandler: WebViewCacherCompletionHandler?
+
     /// Handler called if a webpage fails to load.
     var failureHandler: ((Error) -> ())? = nil
+
     /// Main URL for the webpage request.
     private var mainDocumentURL: URL?
+
     /// Webview used to load the webpage.
     private var webView: UIWebView?
 
@@ -116,21 +121,23 @@ class WebViewCacher: NSObject, UIWebViewDelegate {
         webView.delegate = self
         webView.loadRequest(mutableRequest)
     }
+}
 
-    // MARK: - UIWebViewDelegate
-
+// MARK: - UIWebViewDelegate
+extension WebViewCacher: UIWebViewDelegate {
 	func webViewDidFinishLoad(_ webView: UIWebView) {
         var isComplete = true
-		synchronized(lockObj: self) { () -> Void in
+
+        queue.sync(flags: .barrier){
             if let loadedHandler = self.loadedHandler {
-				isComplete = loadedHandler(webView)
+                isComplete = loadedHandler(webView)
             }
             if isComplete == true {
                 webView.stopLoading()
                 self.webView = nil
-                    
+
                 if let completionHandler = self.completionHandler {
-					completionHandler(self)
+                    completionHandler(self)
                 }
                 self.completionHandler = nil
             }
@@ -145,13 +152,14 @@ class WebViewCacher: NSObject, UIWebViewDelegate {
         }
 
         os_log("WebViewLoadError: %s", type: .error, "\(error)")
-		
-		synchronized(lockObj: self) { () -> Void in
-			if let failureHandler = self.failureHandler {
-				failureHandler(error)
-			}
-			self.failureHandler = nil
-		}
+
+        queue.sync(flags: .barrier){
+            if let failureHandler = self.failureHandler {
+                failureHandler(error)
+            }
+            self.failureHandler = nil
+
+        }
     }
 
     func webView(_ webView: UIWebView, shouldStartLoadWith request: URLRequest, navigationType: UIWebView.NavigationType) -> Bool {

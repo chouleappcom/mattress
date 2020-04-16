@@ -17,9 +17,9 @@ public let MattressCacheRequestPropertyKey = "MattressCacheRequest"
 /// Used to avoid hitting the cache when online
 public let MattressAvoidCacheRetreiveOnlineRequestPropertyKey = "MattressAvoidCacheRetreiveOnlineRequestPropertyKey"
 
-private let kB = 1024
-private let MB = kB * 1024
-private let ArbitrarilyLargeSize = MB * 100
+fileprivate let kB = 1024
+fileprivate let MB = kB * 1024
+fileprivate let ArbitrarilyLargeSize = MB * 100
 
 /**
     URLCache is an NSURLCache with an additional diskCache used
@@ -27,6 +27,10 @@ private let ArbitrarilyLargeSize = MB * 100
     hitting the network.
 */
 public class URLCache: NSURLCache {
+
+    /// Locking Mechanism
+    private let queue = DispatchQueue(label: "MattressURLCache", attributes: .concurrent)
+
     // Handler used to determine if we're offline
     var isOfflineHandler: (() -> Bool)?
 
@@ -193,16 +197,16 @@ public class URLCache: NSURLCache {
                     completeHandler: (() ->Void)? = nil,
                      failureHandler: ((Error) ->Void)? = nil) {
         let webViewCacher = WebViewCacher()
-        
-		synchronized(lockObj: self) {
+
+        queue.sync(flags: .barrier){
             self.cachers.append(webViewCacher)
         }
         
         var failureHandler = failureHandler
         var completeHandler = completeHandler
 
-		webViewCacher.mattressCacheURL(url: url, loadedHandler: loadedHandler, completionHandler: { (webViewCacher) -> () in
-			synchronized(lockObj: self) {
+		webViewCacher.mattressCacheURL(url: url, loadedHandler: loadedHandler, completionHandler: { webViewCacher in
+            self.queue.sync {
 				if let index = self.cachers.firstIndex(of: webViewCacher) {
 					self.cachers.remove(at: index)
                 }

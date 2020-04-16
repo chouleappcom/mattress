@@ -34,15 +34,15 @@ class DiskCache {
 		return false
 	}
 
+    /// Locking Mechanism
+    private let queue = DispatchQueue(label: "MattressDiskCache", attributes: .concurrent)
+
     /// Filesystem path where the cache is stored
     private let path: String
     /// Search path for the disk cache location
 	private let searchPathDirectory: FileManager.SearchPathDirectory
     /// Size limit for the disk cache
     private let maxCacheSize: Int
-
-    /// Provides locking for multi-threading sensitive operations
-    private let lockObject = NSObject()
 
     /// Current disk cache size
     var currentSize = 0
@@ -76,16 +76,16 @@ class DiskCache {
         this cache from disk.
     */
     private func loadPropertiesFromDisk() {
-		synchronized(lockObj: lockObject) { () -> Void in
+        queue.sync(flags: .barrier) {
             if let plistPath = self.diskPathForPropertyList()?.path {
-				if !FileManager.default.fileExists(atPath: plistPath) {
+                if !FileManager.default.fileExists(atPath: plistPath) {
                     self.persistPropertiesToDisk()
                 } else {
                     if let dict = NSDictionary(contentsOfFile: plistPath) {
-						if let currentSize = dict.value(forKey: DictionaryKeys.maxCacheSize) as? Int {
+                        if let currentSize = dict.value(forKey: DictionaryKeys.maxCacheSize) as? Int {
                             self.currentSize = currentSize
                         }
-						if let requestCaches = dict.value(forKey: DictionaryKeys.requestsFilenameArray) as? [String] {
+                        if let requestCaches = dict.value(forKey: DictionaryKeys.requestsFilenameArray) as? [String] {
                             self.requestCaches = requestCaches
                         }
                     }
@@ -99,7 +99,7 @@ class DiskCache {
         this cache to disk.
     */
     private func persistPropertiesToDisk() {
-		synchronized(lockObj: lockObject) { () -> Void in
+        queue.sync(flags: .barrier) {
             if let plistPath = self.diskPathForPropertyList()?.path {
                 let dict = self.propertiesDictionary()
 				(dict as NSDictionary).write(toFile: plistPath, atomically: true)
@@ -115,10 +115,10 @@ class DiskCache {
                 requestCaches = []
                 currentSize = 0
             } catch {
-                NSLog("Error clearing cache")
+                os_log("Error clearing cache", type: .error)
             }
         } else {
-            NSLog("Error clearing cache")
+            os_log("Error clearing cache", type: .error)
         }
     }
 
@@ -140,7 +140,7 @@ class DiskCache {
 					try attributes = FileManager.default.attributesOfItem(atPath: path)
 					try FileManager.default.removeItem(atPath: path)
                 } catch {
-                    NSLog("Error getting attributes of or deleting item at path \(path)")
+                    os_log("Error getting attributes of or deleting item at path %s", type: .error, path)
                     attributes = nil
                     clearCache()
                     return
@@ -156,12 +156,12 @@ class DiskCache {
 					requestCaches.remove(at: index)
                 }
             } else {
-                NSLog("Error getting filename or path")
+                os_log("Error getting filename or path", type: .error)
                 clearCache()
                 return
             }
             if currentSize == lastCurrentSize {
-                NSLog("Error: current cache size did not decrement")
+                os_log("Error: current cache size did not decrement", type: .error)
                 clearCache()
                 return
             }
@@ -194,8 +194,8 @@ class DiskCache {
 	@discardableResult
 	func storeCachedResponse(cachedResponse: CachedURLResponse, forRequest request: URLRequest) -> Bool {
         var success = false
-        
-		synchronized(lockObj: lockObject) { () -> Void in
+
+        queue.sync(flags: .barrier) {
 			if let hash = self.hashForRequest(request: request) {
 				if #available(iOS 8.0, *) {
 					success = self.saveObject(object: cachedResponse, withHash: hash)
@@ -224,7 +224,7 @@ class DiskCache {
     */
 	private func storeCachedResponsePieces(cachedResponse: CachedURLResponse, withHash hash: String) -> Bool {
         var success = true
-		synchronized(lockObj: lockObject) { () -> Void in
+        queue.sync(flags: .barrier) {
 			let responseHash = self.hashForResponseFromHash(hash: hash)
 			success = success && self.saveObject(object: cachedResponse.response, withHash: responseHash)
 			let dataHash = self.hashForDataFromHash(hash: hash)
@@ -252,7 +252,7 @@ class DiskCache {
     */
     private func saveObject(object: Any, withHash hash: String) -> Bool {
         var success = false
-		synchronized(lockObj: lockObject) { () -> Void in
+        queue.sync(flags: .barrier) {
 			if let path = self.diskPathForRequestCacheNamed(name: hash)?.path {
 				let data = NSKeyedArchiver.archivedData(withRootObject: object)
 				if data.count < self.maxCacheSize {
@@ -297,8 +297,8 @@ class DiskCache {
     */
 	func cachedResponseForRequest(request: URLRequest) -> CachedURLResponse? {
 		var response: CachedURLResponse?
-        
-		synchronized(lockObj: lockObject) { () -> Void in
+
+        queue.sync {
 
 			if let path = self.diskPathForRequest(request: request)?.path {
                 if #available(iOS 8.0, *) {
@@ -335,8 +335,8 @@ class DiskCache {
     */
 	private func cachedResponseFromPiecesForRequest(request: URLRequest) -> CachedURLResponse? {
 		var cachedResponse: CachedURLResponse? = nil
-        
-		synchronized(lockObj: lockObject) { () -> Void in
+
+        queue.sync {
 
 			var response: URLResponse? = nil
             var data: Data? = nil
@@ -452,7 +452,7 @@ class DiskCache {
                 do {
 					try FileManager.default.createDirectory(at: fileURL, withIntermediateDirectories: true, attributes: nil)
                 } catch {
-                    NSLog("Error creating directory at URL: \(fileURL)")
+                    os_log("Error creating directory at URL: %s", type: .error, fileURL.absoluteString)
                 }
             }
             url = fileURL
