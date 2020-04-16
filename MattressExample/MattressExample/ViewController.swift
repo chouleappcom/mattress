@@ -8,36 +8,37 @@
 
 import UIKit
 import Mattress
+import os
 
 class ViewController: UIViewController {
 
     @IBOutlet var webView: UIWebView!
-    let urlToCache = NSURL(string: "https://www.google.com")
+    let urlToCache = URL(string: "https://www.google.com")
 
     @IBAction func cachePage() {
-        NSLog("Caching page")
-        if let
-            cache = NSURLCache.sharedURLCache() as? Mattress.URLCache,
-            urlToCache = urlToCache
+
+        os_log("Caching page", type: .debug)
+        if let cache = NSURLCache.shared as? Mattress.URLCache,
+			let urlToCache = urlToCache
         {
-            cache.diskCacheURL(urlToCache, loadedHandler: { (webView) -> (Bool) in
-                    let state = webView.stringByEvaluatingJavaScriptFromString("document.readyState")
+			cache.diskCacheURL(url: urlToCache, loadedHandler: { (webView) -> (Bool) in
+				let state = webView.stringByEvaluatingJavaScript(from: "document.readyState")
                     if state == "complete" {
                         // Loading is done once we've returned true
                         return true
                     }
                     return false
                 }, completeHandler: { () -> Void in
-                    NSLog("Finished caching")
+                    os_log("Finished caching", type: .debug)
                 }, failureHandler: { (error) -> Void in
-                    NSLog("Error caching: %@", error)
+                    os_log("Error caching %s", type: .error, "\(error)")
             })
         }
     }
 
     @IBAction func loadPage() {
         if let urlToCache = urlToCache {
-            let request = NSURLRequest(URL: urlToCache)
+            let request = URLRequest(url: urlToCache)
             webView.loadRequest(request)
         }
     }

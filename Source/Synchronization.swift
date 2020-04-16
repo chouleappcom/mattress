@@ -9,8 +9,8 @@
 import Foundation
 
 func synchronized<T>(lockObj: AnyObject!, closure: () -> T) -> T {
-    objc_sync_enter(lockObj)
+    objc_sync_enter(lockObj as Any)
     let value: T = closure()
-    objc_sync_exit(lockObj)
+    objc_sync_exit(lockObj as Any)
     return value
 }
