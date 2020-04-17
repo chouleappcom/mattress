@@ -76,18 +76,16 @@ class DiskCache {
         this cache from disk.
     */
     private func loadPropertiesFromDisk() {
-        queue.sync(flags: .barrier) {
-            if let plistPath = self.diskPathForPropertyList()?.path {
-                if !FileManager.default.fileExists(atPath: plistPath) {
-                    self.persistPropertiesToDisk()
-                } else {
-                    if let dict = NSDictionary(contentsOfFile: plistPath) {
-                        if let currentSize = dict.value(forKey: DictionaryKeys.maxCacheSize) as? Int {
-                            self.currentSize = currentSize
-                        }
-                        if let requestCaches = dict.value(forKey: DictionaryKeys.requestsFilenameArray) as? [String] {
-                            self.requestCaches = requestCaches
-                        }
+        if let plistPath = self.diskPathForPropertyList()?.path {
+            if !FileManager.default.fileExists(atPath: plistPath) {
+                self.persistPropertiesToDisk()
+            } else {
+                if let dict = NSDictionary(contentsOfFile: plistPath) {
+                    if let currentSize = dict.value(forKey: DictionaryKeys.maxCacheSize) as? Int {
+                        self.currentSize = currentSize
+                    }
+                    if let requestCaches = dict.value(forKey: DictionaryKeys.requestsFilenameArray) as? [String] {
+                        self.requestCaches = requestCaches
                     }
                 }
             }
@@ -99,13 +97,11 @@ class DiskCache {
         this cache to disk.
     */
     private func persistPropertiesToDisk() {
-        queue.sync(flags: .barrier) {
-            if let plistPath = self.diskPathForPropertyList()?.path {
-                let dict = self.propertiesDictionary()
-				(dict as NSDictionary).write(toFile: plistPath, atomically: true)
-            }
-            return
+        if let plistPath = self.diskPathForPropertyList()?.path {
+            let dict = self.propertiesDictionary()
+            (dict as NSDictionary).write(toFile: plistPath, atomically: true)
         }
+        return
     }
 
     func clearCache() {
@@ -224,16 +220,14 @@ class DiskCache {
     */
 	private func storeCachedResponsePieces(cachedResponse: CachedURLResponse, withHash hash: String) -> Bool {
         var success = true
-        queue.sync(flags: .barrier) {
-			let responseHash = self.hashForResponseFromHash(hash: hash)
-			success = success && self.saveObject(object: cachedResponse.response, withHash: responseHash)
-			let dataHash = self.hashForDataFromHash(hash: hash)
-			success = success && self.saveObject(object: cachedResponse.data, withHash: dataHash)
-            if let userInfo = cachedResponse.userInfo {
-                if !userInfo.isEmpty {
-					let userInfoHash = self.hashForUserInfoFromHash(hash: hash)
-					success = success && self.saveObject(object: userInfo, withHash: userInfoHash)
-                }
+        let responseHash = self.hashForResponseFromHash(hash: hash)
+        success = success && self.saveObject(object: cachedResponse.response, withHash: responseHash)
+        let dataHash = self.hashForDataFromHash(hash: hash)
+        success = success && self.saveObject(object: cachedResponse.data, withHash: dataHash)
+        if let userInfo = cachedResponse.userInfo {
+            if !userInfo.isEmpty {
+                let userInfoHash = self.hashForUserInfoFromHash(hash: hash)
+                success = success && self.saveObject(object: userInfo, withHash: userInfoHash)
             }
         }
         return success
@@ -252,33 +246,31 @@ class DiskCache {
     */
     private func saveObject(object: Any, withHash hash: String) -> Bool {
         var success = false
-        queue.sync(flags: .barrier) {
-			if let path = self.diskPathForRequestCacheNamed(name: hash)?.path {
-				let data = NSKeyedArchiver.archivedData(withRootObject: object)
-				if data.count < self.maxCacheSize {
-					self.currentSize += data.count
-                    var index = -1
-                    for i in 0..<self.requestCaches.count {
-                        if self.requestCaches[i] == hash {
-                            index = i
-                            break
-                        }
+        if let path = self.diskPathForRequestCacheNamed(name: hash)?.path {
+            let data = NSKeyedArchiver.archivedData(withRootObject: object)
+            if data.count < self.maxCacheSize {
+                self.currentSize += data.count
+                var index = -1
+                for i in 0..<self.requestCaches.count {
+                    if self.requestCaches[i] == hash {
+                        index = i
+                        break
                     }
-                    if index != -1 {
-						self.requestCaches.remove(at: index)
+                }
+                if index != -1 {
+                    self.requestCaches.remove(at: index)
+                }
+                self.requestCaches.append(hash)
+                self.trimCacheIfNeeded()
+                self.persistPropertiesToDisk()
+                success = true
+                do {
+                    if let url = URL(string: "file://\(path)") {
+                        try data.write(to: url)
                     }
-                    self.requestCaches.append(hash)
-                    self.trimCacheIfNeeded()
-                    self.persistPropertiesToDisk()
-                    success = true
-                    do {
-						if let url = URL(string: "file://\(path)") {
-							try data.write(to: url)
-						}
-                    } catch {
-                        success = false
-                        os_log("Error writing request to disk: %s", type: .error, "\(error)")
-                    }
+                } catch {
+                    success = false
+                    os_log("Error writing request to disk: %s", type: .error, "\(error)")
                 }
             }
         }
