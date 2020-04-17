@@ -8,9 +8,9 @@ Pod::Spec.new do |s|
   s.authors = { 'David Mauro' => 'david.mauro@buzzfeed.com',
 		'Kevin Lord'  => 'kevin.lord@buzzfeed.com' }
   s.source = { :git => 'https://github.com/buzzfeed/mattress.git', :tag => s.version }
-
+  s.swift_version = ['5.0', '5.1', '5.2']    
+  s.requires_arc = true
   s.ios.deployment_target = '11.0'
   s.source_files = 'Source/*.swift', 'Source/Extensions/*.swift'
-  s.requires_arc = true
   s.ios.dependency 'CryptoSwift', '~> 1.3.1'  
 end
