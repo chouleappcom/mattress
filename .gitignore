@@ -2,3 +2,5 @@ pods
 *.xcuserstate
 xcuserdata
 *.xccheckout
+.swiftpm
+.build
