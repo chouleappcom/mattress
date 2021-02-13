@@ -38,7 +38,7 @@ public class URLCache: NSURLCache {
     var diskCache: DiskCache
 
     // Array of WebViewCacher objects used to cache pages
-    var cachers: [WebViewCacher] = []
+    var cachers: [WKWebViewCacher] = []
 
     /*
     We need to override this because the connection
@@ -122,7 +122,7 @@ public class URLCache: NSURLCache {
         :returns: The WebViewCacher responsible for the request if found,
             otherwise nil.
     */
-    func webViewCacherOriginatingRequest(request: URLRequest) -> WebViewCacher? {
+    func webViewCacherOriginatingRequest(request: URLRequest) -> WKWebViewCacher? {
         for cacher in cachers {
 			if cacher.didOriginateRequest(request: request) {
                 return cacher
@@ -193,10 +193,10 @@ public class URLCache: NSURLCache {
             in case of failure.
     */
     public func diskCacheURL(url: URL,
-							 loadedHandler: @escaping WebViewLoadedHandler,
+							 loadedHandler: @escaping WKWebViewLoadedHandler,
                     completeHandler: (() ->Void)? = nil,
                      failureHandler: ((Error) ->Void)? = nil) {
-        let webViewCacher = WebViewCacher()
+        let webViewCacher = WKWebViewCacher()
 
         queue.sync(flags: .barrier){
             self.cachers.append(webViewCacher)

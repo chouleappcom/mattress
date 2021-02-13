@@ -5,54 +5,8 @@ A Swift framework for storing entire web pages into a disk cache distinct from, 
 **Requirements**
 ----------------
 
-- iOS 7.0+ (iOS 8 required for integration as an embedded framework)
-
-**Installation**
-----------------
-
-Mattress includes a wrapper around CommonCrypto so that it can be easily used from within Swift. You will need to make sure you include both the Mattress and CommonCrypto frameworks in your project.
-
-**Carthage (Recommended)**
-
-If you are not already using Carthage, you will need to install it using [Homebrew](http://brew.sh).
-
-```
-$ brew update
-$ brew install carthage
-```
-
-Once installed, add it to your Cartfile:
-
-```
-github "buzzfeed/Mattress" >= 1.0.0
-```
-
-You will then need to build using Carthage, and manually integrate both the Mattress and CommonCrypto frameworks into your project.
-
-```
-$ carthage build
-```
-
-**CocoaPods**
-
-If you are not already using CocoaPods, you will need to install it using RubyGems.
-
-```
-$ gem install cocoapods
-```
-
-Once installed, add it to your Podfile:
-
-```ruby
-pod 'Mattress', '~> 1.0.0'
-```
-
-**Manual**
-
-1. Open the `Mattress` folder, and drag `Mattress.xcodeproj` into the file navigator of your app project. **NOTE: The Mattress project needs to be added somewhere under the target project or you won't be able to add it to your target dependencies.**
-2. Ensure that the deployment target of the Mattress project matches that of the application target.
-3. In your target's "Build Phases" panel, add `Mattress.framework` to the "Target Dependencies"
-4. Click on the `+` button at the top left of the panel and select "New Copy Files Phase". Rename this new phase to "Copy Frameworks", set the "Destination" to "Frameworks", and add both `Mattress.framework` and `CommonCrypto.framework`.
+- iOS 11+
+- Swift Package Manager 5.3+
 
 **Usage**
 ---------
@@ -110,25 +64,6 @@ if let
 ```
 
 Once cached, you can simply load the webpage in a UIWebView and it will be loaded from the Mattress cache, like magic.
-
-**Example**
------------
-
-To run the example, please use the following steps.
-
-1. Open the Mattress workspace
-2. Run the MattressExample scheme
-3. Tap "Cache Page"
-4. Wait for the log message stating caching has finished
-5. Disable internet access
-6. Tap "Load Page" - the page will load via Mattress
- 
-**Considerations**
----------
-
-Mattress does not work with WKWebView. The current WKWebView implementation uses its own internal system for caching and does not properly integrate with NSURLProtocol to allow Mattress to intercept requests made.
-
-Due to Mattress' current architecture and use of web views, a good chunk of the caching work must happen on the main thread. This is obviously not a problem when caching pages while in the background, such as during a background fetch. However, it is something to be mindful of when your app is active in the foreground. We have had good luck using it this way with minimal performance impact, but your mileage may vary.
 
 
 **Contributing**

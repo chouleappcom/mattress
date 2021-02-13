@@ -149,8 +149,8 @@ class URLProtocol: NSURLProtocol, URLSessionDataDelegate {
         
         :returns: The WebViewCacher responsible for the request.
     */
-    private class func webViewCacherForRequest(request: URLRequest) -> WebViewCacher? {
-        var webViewCacherReturn: WebViewCacher? = nil
+    private class func webViewCacherForRequest(request: URLRequest) -> WKWebViewCacher? {
+        var webViewCacherReturn: WKWebViewCacher? = nil
 
         globalLock.sync {
 			for cache in caches.reversed() {
