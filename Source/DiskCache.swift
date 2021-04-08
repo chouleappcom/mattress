@@ -9,7 +9,7 @@
 import Foundation
 import os
 import UIKit
-import CryptoSwift
+import CryptoKit
 
 /**
     DiskCache is a NSURLCache replacement that will store
@@ -513,6 +513,23 @@ class DiskCache {
         :returns: The hash.
     */
     func hashForURLString(string: String) -> String? {
-        return string.sha256()
+        return string.sha256
+    }
+}
+
+internal extension Data {
+
+    /// Return as SHA256 as base64
+    var sha256: String {
+        SHA256.hash(data: self).map { String(format: "%02hhx", $0) }.joined()
+    }
+}
+
+
+internal extension String {
+
+    /// Return the sha256
+    var sha256: String {
+        data(using: .utf8)!.sha256
     }
 }
